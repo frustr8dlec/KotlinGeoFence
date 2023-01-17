@@ -20,6 +20,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.Manifest
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.IntentSender
 import android.net.Uri
@@ -69,7 +70,7 @@ class HuntMainActivity : AppCompatActivity() {
         intent.action = ACTION_GEOFENCE_EVENT
         // Use FLAG_UPDATE_CURRENT so that you get the same pending intent back when calling
         // addGeofences() and removeGeofences().
-        PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,6 +96,7 @@ class HuntMainActivity : AppCompatActivity() {
  *  checkDeviceLocationSettingsAndStartGeofence again to make sure it's actually on, but
  *  we don't resolve the check to keep the user from seeing an endless loop.
  */
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_TURN_DEVICE_LOCATION_ON) {
@@ -128,6 +130,7 @@ class HuntMainActivity : AppCompatActivity() {
         permissions: Array<String>,
         grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         Log.d(TAG, "onRequestPermissionResult")
 
         if (
@@ -276,6 +279,7 @@ class HuntMainActivity : AppCompatActivity() {
      * no more geofences, we remove the geofence and let the viewmodel know that the ending hint
      * is now "active."
      */
+    @SuppressLint("MissingPermission")
     private fun addGeofenceForClue() {
         if (viewModel.geofenceIsActive()) return
         val currentGeofenceIndex = viewModel.nextGeofenceIndex()
@@ -335,7 +339,7 @@ class HuntMainActivity : AppCompatActivity() {
                         Toast.makeText(this@HuntMainActivity, R.string.geofences_not_added,
                             Toast.LENGTH_SHORT).show()
                         if ((it.message != null)) {
-                            Log.w(TAG, it.message)
+                            Log.w(TAG, it.message!!)
                         }
                     }
                 }
